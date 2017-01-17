@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	    http://www.springframework.org/schema/beans/spring-beans.xsd
+	    http://www.springframework.org/schema/context
+	    http://www.springframework.org/schema/context/spring-context.xsd
+	    http://www.springframework.org/schema/aop
+	    http://www.springframework.org/schema/aop/spring-aop.xsd
+	    http://www.springframework.org/schema/tx
+	    http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!-- spring 加载参数配置文件 -->
+    <bean id="propertyConfigurer"
+          class="com.ck.web.common.param.CustomizedPropertyPlaceholderConfigurer">
+        <property name="fileEncoding" value="UTF-8" />
+        <property name="locations">
+            <list>
+                <value>classpath:properties/config/base.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!--启用spingMVC注解-->
+    <context:annotation-config />
+
+    <!--自动扫描-->
+    <context:component-scan base-package="com.ck.web"/>
+
+    <!--配置数据源-->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="username" value="${jdbc.jdbcUsername}"></property>
+        <property name="password" value="${jdbc.jdbcPassword}"></property>
+        <property name="url" value="${jdbc.jdbcUrl}"></property>
+        <property name="driverClassName" value="${jdbc.driverClassName}"></property>
+        <property name="maxActive" value="${jdbc.maxActive}"></property>
+        <property name="maxIdle" value="${jdbc.maxIdle}"></property>
+        <property name="minIdle" value="${jdbc.minIdle}"></property>
+        <property name="validationQuery" value="${jdbc.validSql}" ></property>
+        <property name="maxWait" value="${jdbc.maxWait}"></property>
+        <property name="removeAbandoned" value="${jdbc.removeAbandoned}"></property>
+        <property name="removeAbandonedTimeout" value="${jdbc.removeAbandonedTimeout}"></property>
+        <property name="logAbandoned" value="${jdbc.logAbandoned}"></property>
+        <property name="timeBetweenEvictionRunsMillis" value="${jdbc.timeBetweenEvictionRunsMillis}" />
+        <property name="minEvictableIdleTimeMillis" value="${jdbc.minEvictableIdleTimeMillis}" />
+    </bean>
+
+    <!--mybatis文件配置，扫描所有mapper.xml文件-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="mapperLocations" value="classpath*:mapper/*Mapper.xml" />
+        <property name="plugins">
+            <list>
+                <bean class="com.github.pagehelper.PageHelper">
+                    <property name="properties">
+                        <value>
+                            dialect=mysql
+                        </value>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <!--自动扫描 将mapper.java接口生成代理注入到Spring中-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.ck.web.dal.mapper" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+    </bean>
+
+    <!-- 配置事务管理器，注意这里的dataSource和SqlSessionFactoryBean的dataSource要一致，不然事务就没有作用了 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <!-- 事务控制 -->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+
+    <aop:aspectj-autoproxy />
+
+    <import resource="spring-shiro.xml"/>
+
+</beans>

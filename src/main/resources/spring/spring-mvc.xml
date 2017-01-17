@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	    http://www.springframework.org/schema/beans/spring-beans.xsd
+	    http://www.springframework.org/schema/context
+	    http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <context:component-scan base-package="com.ck.web"/>
+
+    <!-- 访问静态文件 -->
+    <!--<mvc:resources mapping="/views/" location="/views/" />-->
+
+    <!-- 激活Tomcat的defaultServlet来处理静态文件 -->
+    <mvc:default-servlet-handler/>
+
+    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
+
+    <bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <property name="mediaTypes">
+            <value>
+                html=text/html
+                json=application/json
+            </value>
+        </property>
+        <property name="defaultContentType" value="text/html"/>
+    </bean>
+
+    <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+        <property name="order" value="0"/>
+        <property name="contentNegotiationManager" ref="contentNegotiationManager"/>
+
+        <property name="viewResolvers">
+            <list>
+                <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+                    <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+                    <property name="prefix" value="/views/"/><!--前缀-->
+                    <property name="suffix" value=".html"/><!--后缀-->
+                </bean>
+            </list>
+        </property>
+        <property name="defaultViews">
+            <list>
+                <bean class="com.ck.web.common.views.JsonView">
+                    <property name="charset" value="UTF-8"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <!-- spring 加载参数配置文件 -->
+    <bean id="propertyConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="fileEncoding" value="UTF-8" />
+        <property name="locations">
+            <list>
+                <value>classpath:properties/config/base.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- fastjson方式 -->
+    <!-- 避免IE执行AJAX时,返回JSON出现下载文件 -->
+    <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+        <property name="supportedMediaTypes">
+            <list>
+                <value>text/html;charset=UTF-8</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 完成请求和注解POJO的映射 -->
+    <!--<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter" />-->
+
+    <!-- 用于上传,如最大上传值及最小上传值 -->
+    <!--<bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver" >
+        <property name="defaultEncoding" value="UTF-8"></property>
+        <property name="maxUploadSize" value="10485670" />
+        <property name="maxInMemorySize" value="4096"/>
+    </bean>-->
+
+</beans>

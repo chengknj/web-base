@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ck.web.dal.mapper.LoginMapper">
+    <resultMap id="baseResultMap" type="com.ck.web.dal.model.UserInfoDo" >
+        <result column="ID"                     property="id"                   jdbcType="DECIMAL" />
+        <result column="LOGIN_NO"          property="loginNo"         jdbcType="VARCHAR" />
+        <result column="USER_NAME"            property="userName"           jdbcType="VARCHAR" />
+        <result column="GROUP_ID"            property="groupId"           jdbcType="VARCHAR" />
+        <result column="P_GROUP_ID"            property="pGroupId"           jdbcType="VARCHAR" />
+        <result column="LOGIN_PWD"            property="loginPwd"           jdbcType="VARCHAR" />
+        <result column="E_MAIL"            property="eMail"           jdbcType="VARCHAR" />
+        <result column="TELEPHONE"            property="telephone"           jdbcType="TIMESTAMP" />
+        <result column="CREATED_AT"             property="createdAt"            jdbcType="TIMESTAMP" />
+        <result column="CREATED_BY"             property="createdBy"            jdbcType="VARCHAR" />
+        <result column="UPDATED_AT"             property="updatedAt"            jdbcType="TIMESTAMP" />
+        <result column="UPDATED_BY"             property="updatedBy"            jdbcType="VARCHAR" />
+    </resultMap>
+
+    <!-- 校验登录密码是否正确 -->
+    <select id="checkLoginPwd" resultType="int" parameterType="com.ck.web.dal.model.UserInfoDo">
+        SELECT COUNT(1) FROM T_USER_INFO A
+        WHERE A.LOGIN_NO = #{loginNo}
+        AND A.LOGIN_PWD = #{loginPwd}
+    </select>
+
+    <select id="findUserByLoginNo" parameterType="com.ck.web.dal.model.UserInfoDo" resultMap="baseResultMap">
+        SELECT * FROM T_USER_INFO WHERE LOGIN_NO = #{loginNo}
+    </select>
+</mapper>
